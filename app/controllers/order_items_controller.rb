@@ -9,13 +9,14 @@ class OrderItemsController < ApplicationController
 
     if @items.include? @item.product_id
       @existing_quantity = @order.order_items.where(product_id: @item.product_id).take.quantity
+      @existing_id = @order.order_items.where(product_id: @item.product_id).take.id
       @item_to_update = @order.order_items.where(product_id: @item.product_id)
-      @quantity_to_add = item_params.values[0].to_i+@existing_quantity
-      binding.pry
-      @order.quantity = @quantity_to_add
+      @quantity_to_update = item_params.values[0].to_i+@existing_quantity
+      OrderItem.where(id: @existing_id).update_all(quantity: @quantity_to_update)
+    else
+      @order.save
     end
-    @order.save
-
+    
     session[:order_id] = @order.id
     respond_to do |format|
       format.html { redirect_to products_path}
